@@ -1,10 +1,14 @@
 package com.impels.web;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +26,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,11 +38,11 @@ public class ArticleResource{
 		private String business_type;
 		private Map results_map;
 		private int request_status;
-		private List beacon_siblings;
+		private Set beacon_siblings;
 		
 		public ReturnSimpleObject(){
 			this.business_type=ImpelsConstants.SIMPLE_BUSINESS_TYPE;
-			this.beacon_siblings=Collections.EMPTY_LIST;
+			this.beacon_siblings=null;
 			this.request_status=200; //TODO: change to HTTP Status Code from the response
 			this.results_map=Collections.EMPTY_MAP;
 		}
@@ -61,11 +67,11 @@ public class ArticleResource{
 			return this.request_status;
 		}
 		
-		public void setBeacon_siblings(List beacon_siblings){
+		public void setBeacon_siblings(Set beacon_siblings){
 			this.beacon_siblings=beacon_siblings;
 		}
 		
-		public List getBeacon_siblings(){
+		public Set getBeacon_siblings(){
 			return this.beacon_siblings;
 		}
 		
@@ -81,33 +87,57 @@ public class ArticleResource{
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path(ImpelsConstants.GET_PATH)
-	public Set<FileInputStream> getArticles(@QueryParam(ImpelsConstants.BLE_MAJOR_ID) String bleMajId) 
+	public Response getArticles(@QueryParam(ImpelsConstants.BLE_MAJOR_ID) String bleMajId) 
 	throws FileNotFoundException{
 		//TODO: Temporary getting an array of dummy files, but 
 		//TODO:	it will be a data service call to Google Data Service
-		String relativePath="../../../../resources/";
-		File resourcesFolder=new File(relativePath);
+		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		JSONObject obj=new JSONObject();
+		String relativePath="/";
+		String json="";
+		
+		// Creates dummy sibbling ids
+		Set<String> ids=new HashSet<String>(2);
+		ids.add(UUID.randomUUID().toString());
+		ids.add(UUID.randomUUID().toString());
+		
+		// Gets the image files from resource folder
+		URL pathURL=this.getClass().getResource(relativePath);
+		File resourcesFolder=new File(pathURL.getFile());
 		File[] imageFiles=resourcesFolder.listFiles();
-		FileInputStream[] inStreams=new FileInputStream[imageFiles.length];
+		List<FileInputStream> inStreams=new ArrayList<FileInputStream>();
 		int idx=0;
 		for(File imageFile:imageFiles){
-			inStreams[idx]=new FileInputStream(imageFile);
-			idx++;
+			if (imageFile.isFile()){
+				inStreams.add(new FileInputStream(imageFile));
+			}
 		}
-		Set<FileInputStream> inStreamSet = new HashSet<FileInputStream>(Arrays.asList(inStreams));
+		Set<FileInputStream> inStreamSet = new HashSet<FileInputStream>(inStreams);
 		
-		
-//		ReturnSimpleObject returnObj=new ReturnSimpleObject();
-//		Map results_map=new HashMap(inStreamSet.size());
-//		List<Byte> array = new ArrayList();
-//		for(FileInputStream inStream:inStreamSet){
-//			DataInputStream dis = new DataInputStream( inStream );
-//			
-//			results_map.put(UUID.randomUUID().toString(), );
-//			
-//		}
-		
-		return inStreamSet;
+		// Construct the result object by reading byte from byte off these image files.
+		ReturnSimpleObject returnObj=new ReturnSimpleObject();
+		Map<String, int[]> results_map=new HashMap<String, int[]>(inStreamSet.size());
+		for(FileInputStream inStream:inStreamSet){
+			try {
+				int[] array = new int[(int) inStream.getChannel().size()];
+				idx=0;
+				DataInputStream dis = new DataInputStream( inStream );
+				int nextbyte=dis.read();
+				while(nextbyte != -1){
+					array[idx]=nextbyte;
+					nextbyte=dis.read();
+					idx++;
+				}
+				results_map.put(UUID.randomUUID().toString(), array);
+				returnObj.setBeacon_siblings(ids);
+				returnObj.setRequest_status(200);
+				returnObj.setResults_map(results_map);
+				json = ow.writeValueAsString(returnObj);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return Response.status(200).entity(json).build();
 		
 	}
 	
@@ -134,13 +164,6 @@ public class ArticleResource{
 		}
 		return Response.status(200).entity(obj.toString()).build();
 	}
-	
-	@GET
-    @Path("/add/{a}/{b}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String addPlainText(@PathParam("a") double a, @PathParam("b") double b) {
-        return (a + b) + "";
-    }
 	
 	/**
 	 * Creates an article from an image file

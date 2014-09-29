@@ -16,6 +16,7 @@
    <jsr311-api-version>1.1.1</jsr311-api-version>
    <junit-version>3.8.1</junit-version>
    <json-version>20090211</json-version>
+   <jackson-mapper-version>1.9.13</jackson-mapper-version>
   </properties>
   <repositories>
     <repository>
@@ -25,11 +26,16 @@
     </repository>
   </repositories>
   <dependencies>
+	  <dependency>
+	   <groupId>org.codehaus.jackson</groupId>
+	   <artifactId>jackson-mapper-asl</artifactId>
+	   <version>${jackson-mapper-version}</version>
+	  </dependency>
   	<dependency>
-    <groupId>javax.servlet</groupId>
-    <artifactId>servlet-api</artifactId>
-    <version>${servlet-api-version}</version>
-    <scope>provided</scope>
+	    <groupId>javax.servlet</groupId>
+	    <artifactId>servlet-api</artifactId>
+	    <version>${servlet-api-version}</version>
+	    <scope>provided</scope>
 	</dependency>
   	<dependency>
         <groupId>com.sun.jersey</groupId>
