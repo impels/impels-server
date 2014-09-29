@@ -1,5 +1,8 @@
 package com.impels.web;
-
+/**
+ * @author Carol Mak
+ *
+ */
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;

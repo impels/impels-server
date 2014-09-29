@@ -1,4 +1,8 @@
 package com.impels.web;
+/**
+ * @author Carol Mak
+ *
+ */
 
 public class ImpelsConstants {
 	public static final String BLE_MAJOR_ID="bleMajId";
