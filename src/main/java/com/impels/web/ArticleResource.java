@@ -122,26 +122,13 @@ public class ArticleResource{
 	public Response getArticleIds(@QueryParam(ImpelsConstants.BLE_MAJOR_ID) String bleMajId){
 		//TODO: Temporary returning a set of ids
 		//TODO: it will be a data service call to Google Data Service
-//		Set<String> ids=new HashSet<String>(2);
-//		ids.add(UUID.randomUUID().toString());
-//		ids.add(UUID.randomUUID().toString());
-//		
-//		JSONArray art_id_ary=new JSONArray();
-//		art_id_ary.put(ids);
-//		
-//		for(int i=0; i<art_id_ary.length(); i++){
-//			try {
-//				System.out.println("ids["+i+"]="+art_id_ary.get(i));
-//			} catch (JSONException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
-//		
-//		return art_id_ary.toString();
+		Set<String> ids=new HashSet<String>(2);
+		ids.add(UUID.randomUUID().toString());
+		ids.add(UUID.randomUUID().toString());
+		
 		JSONObject obj=new JSONObject();
 		try {
-			obj.put(ImpelsConstants.BLE_MAJOR_ID, bleMajId);
+			obj.put(ImpelsConstants.ARTICLE_ID, ids);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
