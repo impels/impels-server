@@ -122,25 +122,26 @@ public class ArticleResource{
 		// Construct the result object by reading byte from byte off these image files.
 		ReturnSimpleObject returnObj=new ReturnSimpleObject();
 		Map<String, byte[]> results_map=new HashMap<String, byte[]>(inStreamSet.size());
-		for(FileInputStream inStream:inStreamSet){
-			try {
-				byte[] array = new byte[(int) inStream.getChannel().size()];
-				idx=0;
-				DataInputStream dis = new DataInputStream( inStream );
-				int nextbyte=dis.read();
-				while(nextbyte != -1){
-					array[idx]=(byte)nextbyte;
-					nextbyte=dis.read();
-					idx++;
-				}
-				results_map.put(UUID.randomUUID().toString(), array);
-				returnObj.setBeacon_siblings(ids);
-				returnObj.setRequest_status(200);
-				returnObj.setResults_map(results_map);
-				json = ow.writeValueAsString(returnObj);
-			} catch (IOException e) {
-				e.printStackTrace();
+		try {
+			for(FileInputStream inStream:inStreamSet){
+				
+					byte[] array = new byte[(int) inStream.getChannel().size()];
+					idx=0;
+					DataInputStream dis = new DataInputStream( inStream );
+					int nextbyte=dis.read();
+					while(nextbyte != -1){
+						array[idx]=(byte)nextbyte;
+						nextbyte=dis.read();
+						idx++;
+					}
+					results_map.put(UUID.randomUUID().toString(), array);
 			}
+			returnObj.setBeacon_siblings(ids);
+			returnObj.setRequest_status(200);
+			returnObj.setResults_map(results_map);
+			json = ow.writeValueAsString(returnObj);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return Response.status(200).entity(json).build();
 		
