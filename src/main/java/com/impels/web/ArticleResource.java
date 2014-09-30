@@ -121,15 +121,15 @@ public class ArticleResource{
 		
 		// Construct the result object by reading byte from byte off these image files.
 		ReturnSimpleObject returnObj=new ReturnSimpleObject();
-		Map<String, int[]> results_map=new HashMap<String, int[]>(inStreamSet.size());
+		Map<String, byte[]> results_map=new HashMap<String, byte[]>(inStreamSet.size());
 		for(FileInputStream inStream:inStreamSet){
 			try {
-				int[] array = new int[(int) inStream.getChannel().size()];
+				byte[] array = new byte[(int) inStream.getChannel().size()];
 				idx=0;
 				DataInputStream dis = new DataInputStream( inStream );
 				int nextbyte=dis.read();
 				while(nextbyte != -1){
-					array[idx]=nextbyte;
+					array[idx]=(byte)nextbyte;
 					nextbyte=dis.read();
 					idx++;
 				}
