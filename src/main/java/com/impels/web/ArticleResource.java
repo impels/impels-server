@@ -12,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,50 +37,6 @@ import org.json.JSONObject;
 
 @Path(ImpelsConstants.CONTEXT_ROOT)
 public class ArticleResource{
-	
-	private class ReturnSimpleObject{
-		private String business_type;
-		private Map results_map;
-		private int request_status;
-		private Set beacon_siblings;
-		
-		public ReturnSimpleObject(){
-			this.business_type=ImpelsConstants.SIMPLE_BUSINESS_TYPE;
-			this.beacon_siblings=null;
-			this.request_status=200; //TODO: change to HTTP Status Code from the response
-			this.results_map=Collections.EMPTY_MAP;
-		}
-		
-		public String getBusiness_type(){
-			return this.business_type;
-		}
-		
-		public void setResults_map(Map results){
-			this.results_map=results;
-		}
-		
-		public Map getResults_map(){
-			return this.results_map;
-		}
-		
-		public void setRequest_status(int http_status_code){
-			this.request_status=http_status_code;
-		}
-		
-		public int getRequest_status(){
-			return this.request_status;
-		}
-		
-		public void setBeacon_siblings(Set beacon_siblings){
-			this.beacon_siblings=beacon_siblings;
-		}
-		
-		public Set getBeacon_siblings(){
-			return this.beacon_siblings;
-		}
-		
-		
-	}
 	
 	/**
 	 * Gets the images based on beacon major Id
@@ -120,8 +75,9 @@ public class ArticleResource{
 		Set<FileInputStream> inStreamSet = new HashSet<FileInputStream>(inStreams);
 		
 		// Construct the result object by reading byte from byte off these image files.
-		ReturnSimpleObject returnObj=new ReturnSimpleObject();
-		Map<String, byte[]> results_map=new HashMap<String, byte[]>(inStreamSet.size());
+		ReturnObject returnObj=new ReturnSimpleObject();
+		//Map<String, byte[]> results_map=new HashMap<String, byte[]>(inStreamSet.size());
+		JSONObject results = new JSONObject();
 		try {
 			for(FileInputStream inStream:inStreamSet){
 				
@@ -134,13 +90,17 @@ public class ArticleResource{
 						nextbyte=dis.read();
 						idx++;
 					}
-					results_map.put(UUID.randomUUID().toString(), array);
+					//results_map.put(UUID.randomUUID().toString(), array);
+					results.put(ImpelsConstants.ARTICLE_ID, UUID.randomUUID().toString());
+					results.put(ImpelsConstants.IMAGE_FILE, new String(array, "UTF-8"));
 			}
 			returnObj.setBeacon_siblings(ids);
 			returnObj.setRequest_status(200);
-			returnObj.setResults_map(results_map);
+			returnObj.setResults(results);
 			json = ow.writeValueAsString(returnObj);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 		return Response.status(200).entity(json).build();
