@@ -8,6 +8,7 @@ public class ImpelsConstants {
 	public static final String BLE_MAJOR_ID="bleMajId";
 	public static final String ARTICLE_ID="articleId";
 	public static final String IMAGE_FILE="imageFile";
+	public static final String CONTENTS="contents";
 	public static final String IMG_TYPE="image/jpeg";
 	public static final String CONTEXT_ROOT="/articles";
 	public static final String GET_PATH="/getArticles";

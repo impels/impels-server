@@ -12,10 +12,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,14 +28,16 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
 @Path(ImpelsConstants.CONTEXT_ROOT)
 public class ArticleResource{
-	
+	private static final Logger logger = Logger.getLogger(ArticleResource.class);
 	/**
 	 * Gets the images based on beacon major Id
 	 * @param bleMajId
@@ -76,33 +76,33 @@ public class ArticleResource{
 		
 		// Construct the result object by reading byte from byte off these image files.
 		ReturnObject returnObj=new ReturnSimpleObject();
-		//Map<String, byte[]> results_map=new HashMap<String, byte[]>(inStreamSet.size());
-		JSONObject results = new JSONObject();
+		List<JSONObject> resultsList=new ArrayList<JSONObject>();
 		try {
 			for(FileInputStream inStream:inStreamSet){
-				
-					byte[] array = new byte[(int) inStream.getChannel().size()];
-					idx=0;
-					DataInputStream dis = new DataInputStream( inStream );
-					int nextbyte=dis.read();
-					while(nextbyte != -1){
-						array[idx]=(byte)nextbyte;
-						nextbyte=dis.read();
-						idx++;
-					}
-					//results_map.put(UUID.randomUUID().toString(), array);
-					results.put(ImpelsConstants.ARTICLE_ID, UUID.randomUUID().toString());
-					results.put(ImpelsConstants.IMAGE_FILE, new String(array, "UTF-8"));
+				JSONObject results = new JSONObject();
+				byte[] array = new byte[(int) inStream.getChannel().size()];
+				idx=0;
+				DataInputStream dis = new DataInputStream( inStream );
+				int nextbyte=dis.read();
+				while(nextbyte != -1){
+					array[idx]=(byte)nextbyte;
+					nextbyte=dis.read();
+					idx++;
+				}
+				results.put(ImpelsConstants.ARTICLE_ID, UUID.randomUUID().toString());
+				results.put(ImpelsConstants.IMAGE_FILE, new String(array, "UTF-8"));
+				resultsList.add(results);
 			}
 			returnObj.setBeacon_siblings(ids);
 			returnObj.setRequest_status(200);
-			returnObj.setResults(results);
+			returnObj.setResults(resultsList);
 			json = ow.writeValueAsString(returnObj);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		
 		return Response.status(200).entity(json).build();
 		
 	}
